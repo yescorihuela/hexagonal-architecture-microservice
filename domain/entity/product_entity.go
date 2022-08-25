@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	PRICE_MIN  = 1.00
-	PRICE_MAX  = 99_999_999.00
-	SKU_MIN    = 1_000_000
-	SKU_MAX    = 9_999_999
-	SKU_PREFIX = "FAL"
+	PriceMin  = 1.00
+	PriceMax  = 99_999_999.00
+	SkuMin    = 1_000_000
+	SkuMax    = 9_999_999
+	SkuPrefix = "FAL"
 )
 
 type Product struct {
@@ -57,7 +57,7 @@ func (p *Product) IsSKUValid() bool {
 		return false
 	}
 	splittedSku := strings.Split(p.Sku, "-")
-	if splittedSku[0] != SKU_PREFIX {
+	if splittedSku[0] != SkuPrefix {
 		return false
 	}
 	correlative, err := strconv.Atoi(splittedSku[1])
@@ -65,7 +65,7 @@ func (p *Product) IsSKUValid() bool {
 		return false
 	}
 
-	if correlative < SKU_MIN || correlative > SKU_MAX {
+	if correlative < SkuMin || correlative > SkuMax {
 		return false
 	}
 	return true
