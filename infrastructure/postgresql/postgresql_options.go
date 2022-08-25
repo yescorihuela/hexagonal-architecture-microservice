@@ -76,7 +76,7 @@ func (a *PostgresqlOptions) GetURLConnection() string {
 		a.port = &PostgresqlDefaultPort
 	}
 	query := url.Values{}
-	query.Add("sslmode", "false")
+	query.Add("sslmode", "disable")
 	u := &url.URL{
 		Scheme:   "postgres",
 		User:     url.UserPassword(*a.user, *a.password),
