@@ -1,6 +1,9 @@
 package postgresql
 
 import (
+	"os"
+	"strconv"
+
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -17,11 +20,7 @@ type PostgresqlRepository interface {
 	GetConnection() (*gorm.DB, error)
 }
 
-func NewPostgreql() (*gorm.DB, error) {
-	return nil, nil
-}
-
-func NewAzureSQLConnection(opts ...*PostgresqlOptions) *PostgresqlConnection {
+func NewPostgreSQLConnection(opts ...*PostgresqlOptions) *PostgresqlConnection {
 	databaseOptions := MergeOptions(opts...)
 	url := databaseOptions.GetURLConnection()
 	return &PostgresqlConnection{
@@ -44,4 +43,14 @@ func (p *PostgresqlConnection) GetConnection() (*gorm.DB, error) {
 		}
 	}
 	return connection, nil
+}
+
+func InitPGClient() *PostgresqlConnection {
+	databaseName := os.Getenv("DB_NAME")
+	host := os.Getenv("DB_HOST")
+	port, _ := strconv.Atoi(os.Getenv("DB_PORT"))
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	connection := NewPostgreSQLConnection(Config().Server(host).Port(port).DatabaseName(databaseName).User(user).Password(password))
+	return connection
 }
