@@ -9,21 +9,21 @@ func NewProduct(
 	size string,
 	price float64,
 	principalImage entity.URLImage,
-	otherImages []entity.URLImage,
+	// otherImages []entity.URLImage,
 ) *entity.Product {
-	if sku == "" {
+	if validateString(sku, 3, 50) {
 		return &entity.Product{}
 	}
-	if name == "" {
+	if validateString(name, 3, 50) {
 		return &entity.Product{}
 	}
-	if brand == "" {
+	if validateString(brand, 3, 50) {
 		return &entity.Product{}
 	}
-	if size == "" {
+	if validateString(size, 3, 50) {
 		return &entity.Product{}
 	}
-	if price <= 0.0 {
+	if price < entity.PRICE_MIN || price > entity.PRICE_MAX {
 		return &entity.Product{}
 	}
 	if principalImage.Url == "" {
@@ -36,6 +36,13 @@ func NewProduct(
 		Size:           size,
 		Price:          price,
 		PrincipalImage: principalImage,
-		OtherImage:     otherImages,
+		// OtherImage:     otherImages,
 	}
+}
+
+func validateString(value string, minLength, maxLength int) bool {
+	if len(value) < minLength || len(value) > maxLength {
+		return true
+	}
+	return false
 }
