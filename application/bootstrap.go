@@ -5,26 +5,39 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yescorihuela/agrak/infrastructure/postgresql"
-	"gorm.io/gorm"
+	"github.com/yescorihuela/agrak/infrastructure/product"
+	"github.com/yescorihuela/agrak/usecase"
 )
 
 type Server struct {
 	engine   *gin.Engine
-	database *gorm.DB
+	dbClient *postgresql.PostgresqlConnection
 	httpAddr string
 }
 
 func NewServer(host string, port uint) *Server {
-	dbConnection := postgresql.InitPGClient()
-	db, _ := dbConnection.GetConnection()
+	dbClient := postgresql.InitPGClient()
+	postgresql.AutoMigrateEntities(dbClient)
 	server := &Server{
 		engine:   gin.Default(),
-		database: db,
+		dbClient: dbClient,
 		httpAddr: fmt.Sprintf("%s:%d", host, port),
 	}
+	server.registerRoutes()
 	return server
 }
 
 func (s *Server) Run() error {
 	return s.engine.Run(s.httpAddr)
+}
+
+func (s *Server) registerRoutes() {
+	productRepository := product.NewPersistenceProductRepository(s.dbClient)
+	productService := usecase.NewProductService(productRepository)
+
+	ph := NewProductHandlers(productService)
+
+	v1 := s.engine.Group("/v1")
+	v1.POST("/products", ph.CreateProduct)
+	v1.GET("/products/:sku", ph.GetProductBySku)
 }

@@ -1,6 +1,10 @@
 package factory
 
-import "github.com/yescorihuela/agrak/domain/entity"
+import (
+	"fmt"
+
+	"github.com/yescorihuela/agrak/domain/entity"
+)
 
 func NewProduct(
 	sku,
@@ -12,22 +16,27 @@ func NewProduct(
 	// otherImages []entity.URLImage,
 ) *entity.Product {
 	if validateString(sku, 3, 50) {
-		return &entity.Product{}
+		return nil
 	}
+
 	if validateString(name, 3, 50) {
-		return &entity.Product{}
+		return nil
 	}
+
 	if validateString(brand, 3, 50) {
-		return &entity.Product{}
+		return nil
 	}
-	if validateString(size, 3, 50) {
-		return &entity.Product{}
+
+	if validateString(size, 1, 15) {
+		return nil
 	}
-	if price < entity.PRICE_MIN || price > entity.PRICE_MAX {
-		return &entity.Product{}
+
+	if price < entity.PriceMin || price > entity.PriceMax {
+		return nil
 	}
+	fmt.Println("price", price)
 	if principalImage.Url == "" {
-		return &entity.Product{}
+		return nil
 	}
 	return &entity.Product{
 		Sku:            sku,

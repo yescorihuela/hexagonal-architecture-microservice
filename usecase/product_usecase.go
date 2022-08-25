@@ -6,7 +6,7 @@ import (
 )
 
 type Service interface {
-	Create() error
+	CreateProduct(product entity.Product) error
 	FindBySku(sku string) (*entity.Product, error)
 	FindAll() error
 	Update() error
@@ -23,7 +23,11 @@ func NewProductService(repository repository.ProductRepository) Service {
 	}
 }
 
-func (s *ProductService) Create() error {
+func (s *ProductService) CreateProduct(product entity.Product) error {
+	err := s.repository.Save(product)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
