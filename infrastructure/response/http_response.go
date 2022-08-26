@@ -14,6 +14,16 @@ type ProductResponse struct {
 	OtherImages    []string `json:"-"`
 }
 
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
+func NewErrorResponse(message string) *ErrorResponse {
+	return &ErrorResponse{
+		Message: message,
+	}
+}
+
 func ConvertFromEntityToResponse(ep entity.Product) *ProductResponse {
 	return &ProductResponse{
 		Sku:            ep.Sku,
