@@ -11,7 +11,7 @@ type ProductResponse struct {
 	Size           string   `json:"size"`
 	Price          float64  `json:"price"`
 	PrincipalImage string   `json:"principal_image"`
-	OtherImages    []string `json:"-"`
+	OtherImages    []string `json:"other_images"`
 }
 
 type ErrorResponse struct {
@@ -25,6 +25,7 @@ func NewErrorResponse(message string) *ErrorResponse {
 }
 
 func ConvertFromEntityToResponse(ep entity.Product) *ProductResponse {
+
 	return &ProductResponse{
 		Sku:            ep.Sku,
 		Name:           ep.Name,

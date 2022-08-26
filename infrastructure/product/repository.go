@@ -2,6 +2,7 @@ package product
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/yescorihuela/agrak/domain/entity"
@@ -42,6 +43,7 @@ func (p *PersistenceProductRepository) Save(product entity.Product) error {
 			Size:           product.Size,
 			Price:          product.Price,
 			PrincipalImage: product.PrincipalImage,
+			OtherImages:    getStringFromSlicedUrls(product.OtherImages),
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
 		})
@@ -63,6 +65,7 @@ func (p *PersistenceProductRepository) GetBySku(sku string) (*entity.Product, er
 	if result.Error != nil {
 		return nil, result.Error
 	}
+	otherImages := getSlicedUrls(product.OtherImages)
 	entityProduct, err := factory.NewProduct(
 		product.Sku,
 		product.Name,
@@ -70,7 +73,7 @@ func (p *PersistenceProductRepository) GetBySku(sku string) (*entity.Product, er
 		product.Size,
 		product.Price,
 		product.PrincipalImage,
-		product.OtherImages,
+		otherImages,
 	)
 	if err != nil {
 		return nil, err
@@ -100,6 +103,7 @@ func (p *PersistenceProductRepository) GetAllProducts() ([]entity.Product, error
 			Size:           v.Size,
 			Price:          v.Price,
 			PrincipalImage: v.PrincipalImage,
+			OtherImages:    getSlicedUrls(v.OtherImages),
 		}
 		entityProducts = append(entityProducts, productFromModel)
 	}
@@ -114,6 +118,8 @@ func (p *PersistenceProductRepository) Update(oldSku string, product entity.Prod
 	oldProduct := model.ProductModel{
 		Sku: oldSku,
 	}
+
+	otherImages := strings.Join(product.OtherImages, ",")
 	newProduct := model.ProductModel{
 		Sku:            product.Sku,
 		Name:           product.Name,
@@ -121,6 +127,7 @@ func (p *PersistenceProductRepository) Update(oldSku string, product entity.Prod
 		Size:           product.Size,
 		Price:          product.Price,
 		PrincipalImage: product.PrincipalImage,
+		OtherImages:    otherImages,
 		UpdatedAt:      time.Now(),
 	}
 
@@ -136,7 +143,7 @@ func (p *PersistenceProductRepository) Update(oldSku string, product entity.Prod
 		newProduct.Size,
 		newProduct.Price,
 		newProduct.PrincipalImage,
-		newProduct.OtherImages,
+		strings.Split(otherImages, ","),
 	)
 	if err != nil {
 		return nil, err
@@ -154,4 +161,26 @@ func (p *PersistenceProductRepository) Delete(sku string) error {
 		return err
 	}
 	return nil
+}
+
+func getSlicedUrls(urls string) []string {
+	slicedUrls := strings.Split(urls, ",")
+	aux := make([]string, 0)
+	if len(slicedUrls) > 0 {
+		for _, url := range slicedUrls {
+			if strings.TrimSpace(url) != "" {
+				aux = append(aux, url)
+			}
+		}
+		return aux
+	}
+	return nil
+}
+
+func getStringFromSlicedUrls(slicedUrls []string) string {
+	joinedUrls := strings.TrimSpace(strings.Join(slicedUrls, ","))
+	if joinedUrls != "" {
+		return joinedUrls
+	}
+	return ""
 }
