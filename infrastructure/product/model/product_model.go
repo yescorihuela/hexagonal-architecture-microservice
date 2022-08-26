@@ -11,7 +11,7 @@ type ProductModel struct {
 	PrincipalImage string    `gorm:"column:principal_image"`
 	CreatedAt      time.Time `gorm:"column:created_at"`
 	UpdatedAt      time.Time `gorm:"column:updated_at"`
-	// OtherImages     []string `gorm:"column:other_image"`
+	OtherImages    []string  `gorm:"column:other_images"`
 }
 
 func (p *ProductModel) TableName() string {
