@@ -1,6 +1,7 @@
 package product
 
 import (
+	"errors"
 	"time"
 
 	"github.com/yescorihuela/agrak/domain/entity"
@@ -24,6 +25,11 @@ func (p *PersistenceProductRepository) Save(product entity.Product) error {
 	db, err := p.Connection.GetConnection()
 	if err != nil {
 		return err
+	}
+
+	checkedProduct, _ := p.GetBySku(product.Sku)
+	if checkedProduct != nil {
+		return errors.New("duplicated sku")
 	}
 
 	isValid, err := product.IsValid()

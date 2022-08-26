@@ -27,22 +27,23 @@ type Product struct {
 
 func (p *Product) IsValid() (bool, error) {
 	if strings.TrimSpace(p.Sku) == "" {
-		return false, nil
+		return false, errors.New("empty sku")
+	}
+	if !p.IsSKUValid() {
+		return false, errors.New("invalid sku format (right format: FAL-XXXXXXX)")
 	}
 	if strings.TrimSpace(p.Name) == "" {
-		return false, errors.New("")
+		return false, errors.New("empty name")
 	}
 	if strings.TrimSpace(p.Brand) == "" {
-		return false, errors.New("")
+		return false, errors.New("empty brand")
 	}
-	if strings.TrimSpace(p.Size) == "" {
-		return false, errors.New("")
-	}
+
 	if strings.TrimSpace(string(p.PrincipalImage.Url)) == "" {
-		return false, errors.New("")
+		return false, errors.New("principal image url empty")
 	}
 	if p.Price == 0.0 {
-		return false, errors.New("")
+		return false, errors.New("price with zero value")
 	}
 	// for _, v := range p.OtherImage {
 	// 	if strings.TrimSpace(string(v.Url)) == "" {
@@ -57,9 +58,6 @@ func (p *Product) IsSKUValid() bool {
 		return false
 	}
 	splittedSku := strings.Split(p.Sku, "-")
-	if splittedSku[0] != SkuPrefix {
-		return false
-	}
 	correlative, err := strconv.Atoi(splittedSku[1])
 	if err != nil {
 		return false
