@@ -45,6 +45,7 @@ func (p *PersistenceProductRepository) Save(product entity.Product) error {
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
 		})
+
 		if err != nil {
 			return err.Error
 		}
@@ -62,7 +63,7 @@ func (p *PersistenceProductRepository) GetBySku(sku string) (*entity.Product, er
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	entityProduct := factory.NewProduct(
+	entityProduct, err := factory.NewProduct(
 		product.Sku,
 		product.Name,
 		product.Brand,
@@ -71,6 +72,9 @@ func (p *PersistenceProductRepository) GetBySku(sku string) (*entity.Product, er
 		entity.URLImage{Url: product.PrincipalImage},
 		// []entity.URLImage{},
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	return entityProduct, nil
 }
@@ -89,17 +93,15 @@ func (p *PersistenceProductRepository) GetAllProducts() ([]entity.Product, error
 	}
 	entityProducts := make([]entity.Product, 0)
 	for _, v := range products {
-		entityProducts = append(entityProducts,
-			*factory.NewProduct(
-				v.Sku,
-				v.Name,
-				v.Brand,
-				v.Size,
-				v.Price,
-				entity.URLImage{Url: v.PrincipalImage},
-				// []entity.URLImage{},
-			),
-		)
+		productFromModel := entity.Product{
+			Sku:            v.Sku,
+			Name:           v.Name,
+			Brand:          v.Brand,
+			Size:           v.Size,
+			Price:          v.Price,
+			PrincipalImage: entity.URLImage{Url: v.PrincipalImage},
+		}
+		entityProducts = append(entityProducts, productFromModel)
 	}
 	return entityProducts, nil
 }
@@ -127,7 +129,7 @@ func (p *PersistenceProductRepository) Update(oldSku string, product entity.Prod
 		return nil, result.Error
 	}
 
-	updatedProduct := factory.NewProduct(
+	updatedProduct, err := factory.NewProduct(
 		newProduct.Sku,
 		newProduct.Name,
 		newProduct.Brand,
@@ -135,6 +137,9 @@ func (p *PersistenceProductRepository) Update(oldSku string, product entity.Prod
 		newProduct.Price,
 		entity.URLImage{Url: newProduct.PrincipalImage},
 	)
+	if err != nil {
+		return nil, err
+	}
 	return updatedProduct, nil
 }
 

@@ -1,6 +1,8 @@
 package factory
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/yescorihuela/agrak/domain/entity"
@@ -14,29 +16,33 @@ func NewProduct(
 	price float64,
 	principalImage entity.URLImage,
 	// otherImages []entity.URLImage,
-) *entity.Product {
-	if validateString(sku, 3, 50) {
-		return nil
+) (*entity.Product, error) {
+	if validateLengthString(sku, 3, 50) {
+		return nil, ErrorFieldLimit("sku", 3, 50)
 	}
 
-	if validateString(name, 3, 50) {
-		return nil
+	if validateLengthString(name, 3, 50) {
+		return nil, ErrorFieldLimit("name", 3, 50)
 	}
 
-	if validateString(brand, 3, 50) {
-		return nil
+	if validateLengthString(brand, 3, 50) {
+		return nil, ErrorFieldLimit("brand", 3, 50)
 	}
 
-	if validateString(size, 1, 15) {
-		return nil
+	if strings.TrimSpace(size) != "" {
+		if validateLengthString(size, 1, 15) {
+			return nil, ErrorFieldLimit("size", 3, 50)
+		}
+	} else {
+		size = "ST"
 	}
 
 	if price < entity.PriceMin || price > entity.PriceMax {
-		return nil
+		return nil, ErrorFieldLimit("price", entity.PriceMin, entity.PriceMax)
 	}
 
 	if strings.TrimSpace(principalImage.Url) == "" {
-		return nil
+		return nil, errors.New("principal_url must be a valid url")
 	}
 	return &entity.Product{
 		Sku:            sku,
@@ -46,12 +52,16 @@ func NewProduct(
 		Price:          price,
 		PrincipalImage: principalImage,
 		// OtherImage:     otherImages,
-	}
+	}, nil
 }
 
-func validateString(value string, minLength, maxLength int) bool {
+func validateLengthString(value string, minLength, maxLength int) bool {
 	if len(value) < minLength || len(value) > maxLength {
 		return true
 	}
 	return false
+}
+
+func ErrorFieldLimit(fieldName string, minLength, maxLength int) error {
+	return fmt.Errorf("%s must be between %d and %d", fieldName, minLength, maxLength)
 }

@@ -46,7 +46,7 @@ func (ph *ProductHandlers) CreateProduct(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 	}
-	product := factory.NewProduct(
+	product, err := factory.NewProduct(
 		reqProduct.Sku,
 		reqProduct.Name,
 		reqProduct.Brand,
@@ -106,7 +106,7 @@ func (ph *ProductHandlers) UpdateProduct(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 	}
-	newProduct := factory.NewProduct(
+	newProduct, err := factory.NewProduct(
 		reqProduct.Sku,
 		reqProduct.Name,
 		reqProduct.Brand,
