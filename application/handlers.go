@@ -25,7 +25,7 @@ func (ph *ProductHandlers) GetProductBySku(ctx *gin.Context) {
 	sku := ctx.Param("sku")
 	product, err := ph.service.FindBySku(sku)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, nil)
+		ctx.JSON(http.StatusNotFound, response.NewErrorResponse(err.Error()))
 		return
 	}
 
@@ -44,7 +44,7 @@ func (ph *ProductHandlers) CreateProduct(ctx *gin.Context) {
 	}{}
 	err := ctx.ShouldBindJSON(&reqProduct)
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, nil)
+		ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 	}
 	product := factory.NewProduct(
 		reqProduct.Sku,
@@ -58,15 +58,15 @@ func (ph *ProductHandlers) CreateProduct(ctx *gin.Context) {
 		if validProduct, _ := product.IsValid(); validProduct {
 			err = ph.service.CreateProduct(*product)
 			if err != nil {
-				ctx.JSON(http.StatusUnprocessableEntity, err)
+				ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 				return
 			}
 		} else {
-			ctx.JSON(http.StatusUnprocessableEntity, err)
+			ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 			return
 		}
 	} else {
-		ctx.JSON(http.StatusUnprocessableEntity, err)
+		ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 		return
 	}
 	response := response.ConvertFromEntityToResponse(*product)
@@ -77,7 +77,7 @@ func (ph *ProductHandlers) GetAllProducts(ctx *gin.Context) {
 	products, err := ph.service.FindAll()
 	responseJSON := make([]response.ProductResponse, 0)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, nil)
+		ctx.JSON(http.StatusNotFound, response.NewErrorResponse(err.Error()))
 		return
 	}
 	for _, product := range products {
@@ -90,7 +90,7 @@ func (ph *ProductHandlers) UpdateProduct(ctx *gin.Context) {
 	sku := ctx.Param("sku")
 	product, err := ph.service.FindBySku(sku)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, nil)
+		ctx.JSON(http.StatusNotFound, response.NewErrorResponse(err.Error()))
 		return
 	}
 
@@ -104,7 +104,7 @@ func (ph *ProductHandlers) UpdateProduct(ctx *gin.Context) {
 	}{}
 	err = ctx.ShouldBindJSON(&reqProduct)
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, nil)
+		ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 	}
 	newProduct := factory.NewProduct(
 		reqProduct.Sku,
@@ -117,7 +117,7 @@ func (ph *ProductHandlers) UpdateProduct(ctx *gin.Context) {
 	if !reflect.DeepEqual(product, newProduct) {
 		product, err = ph.service.UpdateProduct(sku, *newProduct)
 		if err != nil {
-			ctx.JSON(http.StatusUnprocessableEntity, nil)
+			ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 			return
 		}
 
@@ -136,7 +136,7 @@ func (ph *ProductHandlers) Delete(ctx *gin.Context) {
 	sku := ctx.Param("sku")
 	err := ph.service.DeleteProduct(sku)
 	if err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, nil)
+		ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 		return
 	}
 	ctx.JSON(http.StatusNoContent, nil)
