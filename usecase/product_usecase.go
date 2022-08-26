@@ -8,9 +8,9 @@ import (
 type Service interface {
 	CreateProduct(product entity.Product) error
 	FindBySku(sku string) (*entity.Product, error)
-	FindAll() error
-	Update() error
-	Delete(sku string) error
+	FindAll() ([]entity.Product, error)
+	UpdateProduct(oldSku string, product entity.Product) (*entity.Product, error)
+	DeleteProduct(sku string) error
 }
 
 type ProductService struct {
@@ -39,16 +39,26 @@ func (s *ProductService) FindBySku(sku string) (*entity.Product, error) {
 	return product, nil
 }
 
-func (s *ProductService) FindAll() error {
-	s.repository.GetAllProducts()
-	return nil
+func (s *ProductService) FindAll() ([]entity.Product, error) {
+	products, err := s.repository.GetAllProducts()
+	if err != nil {
+		return nil, err
+	}
+	return products, nil
 }
 
-func (s *ProductService) Update() error {
-	return nil
+func (s *ProductService) UpdateProduct(oldSku string, product entity.Product) (*entity.Product, error) {
+	updatedProduct, err := s.repository.Update(oldSku, product)
+	if err != nil {
+		return nil, err
+	}
+	return updatedProduct, nil
 }
 
-func (s *ProductService) Delete(sku string) error {
-	s.repository.Delete(sku)
+func (s *ProductService) DeleteProduct(sku string) error {
+	err := s.repository.Delete(sku)
+	if err != nil {
+		return err
+	}
 	return nil
 }
