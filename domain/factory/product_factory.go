@@ -1,7 +1,6 @@
 package factory
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -42,8 +41,13 @@ func NewProduct(
 	}
 
 	if strings.TrimSpace(principalImage) == "" {
-		return nil, errors.New("principal_url must be a valid url")
+		return nil, ErrorUrlField("principal_url")
 	}
+
+	if !entity.IsValidUrl(principalImage) {
+		return nil, ErrorUrlField("principal_url")
+	}
+
 	return &entity.Product{
 		Sku:            sku,
 		Name:           name,
@@ -64,4 +68,8 @@ func validateLengthString(value string, minLength, maxLength int) bool {
 
 func ErrorFieldLimit(fieldName string, minLength, maxLength int) error {
 	return fmt.Errorf("%s must be between %d and %d", fieldName, minLength, maxLength)
+}
+
+func ErrorUrlField(fieldName string) error {
+	return fmt.Errorf("%s must be a valid url", fieldName)
 }

@@ -56,6 +56,7 @@ func (ph *ProductHandlers) CreateProduct(ctx *gin.Context) {
 		request.PrincipalImage,
 		request.OtherImages,
 	)
+
 	if product != nil {
 		if validProduct, err := product.IsValid(); validProduct {
 			err = ph.service.CreateProduct(*product)
