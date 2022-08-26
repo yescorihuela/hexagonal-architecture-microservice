@@ -10,6 +10,7 @@ import (
 	"github.com/yescorihuela/agrak/domain/repository"
 	"github.com/yescorihuela/agrak/infrastructure/database"
 	"github.com/yescorihuela/agrak/infrastructure/postgresql/product/model"
+	"github.com/yescorihuela/agrak/shared/common"
 )
 
 type PersistenceProductRepository struct {
@@ -43,7 +44,7 @@ func (p *PersistenceProductRepository) Save(product entity.Product) error {
 			Size:           product.Size,
 			Price:          product.Price,
 			PrincipalImage: product.PrincipalImage,
-			OtherImages:    getStringFromSlicedUrls(product.OtherImages),
+			OtherImages:    common.GetStringFromSlicedUrls(product.OtherImages),
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
 		})
@@ -65,7 +66,7 @@ func (p *PersistenceProductRepository) GetBySku(sku string) (*entity.Product, er
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	otherImages := getSlicedUrls(product.OtherImages)
+	otherImages := common.GetSlicedUrls(product.OtherImages)
 	entityProduct, err := factory.NewProduct(
 		product.Sku,
 		product.Name,
@@ -103,7 +104,7 @@ func (p *PersistenceProductRepository) GetAllProducts() ([]entity.Product, error
 			Size:           v.Size,
 			Price:          v.Price,
 			PrincipalImage: v.PrincipalImage,
-			OtherImages:    getSlicedUrls(v.OtherImages),
+			OtherImages:    common.GetSlicedUrls(v.OtherImages),
 		}
 		entityProducts = append(entityProducts, productFromModel)
 	}
@@ -143,7 +144,7 @@ func (p *PersistenceProductRepository) Update(oldSku string, product entity.Prod
 		newProduct.Size,
 		newProduct.Price,
 		newProduct.PrincipalImage,
-		strings.Split(otherImages, ","),
+		common.GetSlicedUrls(otherImages),
 	)
 	if err != nil {
 		return nil, err
@@ -161,23 +162,4 @@ func (p *PersistenceProductRepository) Delete(sku string) error {
 		return err
 	}
 	return nil
-}
-
-func getSlicedUrls(urls string) []string {
-	slicedUrls := strings.Split(urls, ",")
-	aux := make([]string, 0)
-	if len(slicedUrls) > 0 {
-		for _, url := range slicedUrls {
-			if strings.TrimSpace(url) != "" {
-				aux = append(aux, url)
-			}
-		}
-		return aux
-	}
-	return nil
-}
-
-func getStringFromSlicedUrls(slicedUrls []string) string {
-	joinedUrls := strings.TrimSpace(strings.Join(slicedUrls, ","))
-	return joinedUrls
 }
