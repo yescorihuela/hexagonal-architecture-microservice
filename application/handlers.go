@@ -55,7 +55,7 @@ func (ph *ProductHandlers) CreateProduct(ctx *gin.Context) {
 		entity.URLImage{Url: reqProduct.PrincipalImage},
 	)
 	if product != nil {
-		if validProduct, _ := product.IsValid(); validProduct {
+		if validProduct, err := product.IsValid(); validProduct {
 			err = ph.service.CreateProduct(*product)
 			if err != nil {
 				ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
