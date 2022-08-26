@@ -16,10 +16,6 @@ type PostgresqlConnection struct {
 	url     string
 }
 
-type PostgresqlRepository interface {
-	GetConnection() (*gorm.DB, error)
-}
-
 func NewPostgreSQLConnection(opts ...*PostgresqlOptions) *PostgresqlConnection {
 	databaseOptions := MergeOptions(opts...)
 	url := databaseOptions.GetURLConnection()

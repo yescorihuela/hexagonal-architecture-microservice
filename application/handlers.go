@@ -2,6 +2,7 @@ package application
 
 import (
 	"net/http"
+	"reflect"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yescorihuela/agrak/domain/entity"
@@ -68,20 +69,72 @@ func (ph *ProductHandlers) CreateProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnprocessableEntity, err)
 		return
 	}
-	ctx.JSON(http.StatusCreated, nil)
+	response := response.ConvertFromEntityToResponse(*product)
+	ctx.JSON(http.StatusCreated, response)
 }
 
 func (ph *ProductHandlers) GetAllProducts(ctx *gin.Context) {
-
+	products, err := ph.service.FindAll()
+	responseJSON := make([]response.ProductResponse, 0)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, nil)
+		return
+	}
+	for _, product := range products {
+		responseJSON = append(responseJSON, *response.ConvertFromEntityToResponse(product))
+	}
+	ctx.JSON(http.StatusOK, responseJSON)
 }
 
-func (ph *ProductHandlers) Update(ctx *gin.Context) {
+func (ph *ProductHandlers) UpdateProduct(ctx *gin.Context) {
+	sku := ctx.Param("sku")
+	product, err := ph.service.FindBySku(sku)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, nil)
+		return
+	}
 
+	reqProduct := struct {
+		Sku            string  `json:"sku"`
+		Name           string  `json:"name"`
+		Brand          string  `json:"brand"`
+		Size           string  `json:"size"`
+		Price          float64 `json:"price"`
+		PrincipalImage string  `json:"principal_image"`
+	}{}
+	err = ctx.ShouldBindJSON(&reqProduct)
+	if err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, nil)
+	}
+	newProduct := factory.NewProduct(
+		reqProduct.Sku,
+		reqProduct.Name,
+		reqProduct.Brand,
+		reqProduct.Size,
+		reqProduct.Price,
+		entity.URLImage{Url: reqProduct.PrincipalImage},
+	)
+	if !reflect.DeepEqual(product, newProduct) {
+		product, err = ph.service.UpdateProduct(sku, *newProduct)
+		if err != nil {
+			ctx.JSON(http.StatusUnprocessableEntity, nil)
+			return
+		}
+
+		if value, _ := product.IsValid(); value {
+			ctx.JSON(http.StatusOK, response.ConvertFromEntityToResponse(*product))
+			return
+		} else {
+			ctx.JSON(http.StatusInternalServerError, response.ConvertFromEntityToResponse(*product))
+			return
+		}
+	}
+	ctx.JSON(http.StatusOK, response.ConvertFromEntityToResponse(*newProduct))
 }
 
 func (ph *ProductHandlers) Delete(ctx *gin.Context) {
 	sku := ctx.Param("sku")
-	err := ph.service.Delete(sku)
+	err := ph.service.DeleteProduct(sku)
 	if err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, nil)
 		return

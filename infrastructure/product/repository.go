@@ -6,15 +6,15 @@ import (
 	"github.com/yescorihuela/agrak/domain/entity"
 	"github.com/yescorihuela/agrak/domain/factory"
 	"github.com/yescorihuela/agrak/domain/repository"
-	"github.com/yescorihuela/agrak/infrastructure/postgresql"
+	"github.com/yescorihuela/agrak/infrastructure/database"
 	"github.com/yescorihuela/agrak/infrastructure/product/model"
 )
 
 type PersistenceProductRepository struct {
-	Connection postgresql.PostgresqlRepository
+	Connection database.GenericDatabaseRepository
 }
 
-func NewPersistenceProductRepository(conn postgresql.PostgresqlRepository) repository.ProductRepository {
+func NewPersistenceProductRepository(conn database.GenericDatabaseRepository) repository.ProductRepository {
 	return &PersistenceProductRepository{
 		Connection: conn,
 	}
@@ -52,7 +52,7 @@ func (p *PersistenceProductRepository) GetBySku(sku string) (*entity.Product, er
 		return nil, err
 	}
 	product := model.ProductModel{}
-	result := db.First(&product, sku)
+	result := db.First(&product, "sku = ?", sku)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -98,8 +98,38 @@ func (p *PersistenceProductRepository) GetAllProducts() ([]entity.Product, error
 	return entityProducts, nil
 }
 
-func (p *PersistenceProductRepository) Update(product entity.Product) error {
-	return nil
+func (p *PersistenceProductRepository) Update(oldSku string, product entity.Product) (*entity.Product, error) {
+	db, err := p.Connection.GetConnection()
+	if err != nil {
+		return nil, err
+	}
+	oldProduct := model.ProductModel{
+		Sku: oldSku,
+	}
+	newProduct := model.ProductModel{
+		Sku:            product.Sku,
+		Name:           product.Name,
+		Brand:          product.Brand,
+		Size:           product.Size,
+		Price:          product.Price,
+		PrincipalImage: product.PrincipalImage.Url,
+		UpdatedAt:      time.Now(),
+	}
+
+	result := db.Model(&oldProduct).Updates(newProduct)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	updatedProduct := factory.NewProduct(
+		newProduct.Sku,
+		newProduct.Name,
+		newProduct.Brand,
+		newProduct.Size,
+		newProduct.Price,
+		entity.URLImage{Url: newProduct.PrincipalImage},
+	)
+	return updatedProduct, nil
 }
 
 func (p *PersistenceProductRepository) Delete(sku string) error {
@@ -107,7 +137,7 @@ func (p *PersistenceProductRepository) Delete(sku string) error {
 	if err != nil {
 		return err
 	}
-	result := db.Delete(&model.ProductModel{}, sku)
+	result := db.Delete(&model.ProductModel{}, "sku = ?", sku)
 	if result.Error != nil {
 		return err
 	}

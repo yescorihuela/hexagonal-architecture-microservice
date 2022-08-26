@@ -1,7 +1,7 @@
 package factory
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/yescorihuela/agrak/domain/entity"
 )
@@ -34,8 +34,8 @@ func NewProduct(
 	if price < entity.PriceMin || price > entity.PriceMax {
 		return nil
 	}
-	fmt.Println("price", price)
-	if principalImage.Url == "" {
+
+	if strings.TrimSpace(principalImage.Url) == "" {
 		return nil
 	}
 	return &entity.Product{
