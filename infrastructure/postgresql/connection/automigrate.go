@@ -1,8 +1,8 @@
-package postgresql
+package connection
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/yescorihuela/agrak/infrastructure/product/model"
+	"github.com/yescorihuela/agrak/infrastructure/postgresql/product/model"
 )
 
 type migrate struct {

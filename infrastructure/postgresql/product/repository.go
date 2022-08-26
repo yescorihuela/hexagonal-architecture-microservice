@@ -9,7 +9,7 @@ import (
 	"github.com/yescorihuela/agrak/domain/factory"
 	"github.com/yescorihuela/agrak/domain/repository"
 	"github.com/yescorihuela/agrak/infrastructure/database"
-	"github.com/yescorihuela/agrak/infrastructure/product/model"
+	"github.com/yescorihuela/agrak/infrastructure/postgresql/product/model"
 )
 
 type PersistenceProductRepository struct {
@@ -179,8 +179,5 @@ func getSlicedUrls(urls string) []string {
 
 func getStringFromSlicedUrls(slicedUrls []string) string {
 	joinedUrls := strings.TrimSpace(strings.Join(slicedUrls, ","))
-	if joinedUrls != "" {
-		return joinedUrls
-	}
-	return ""
+	return joinedUrls
 }
