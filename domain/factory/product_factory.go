@@ -14,8 +14,8 @@ func NewProduct(
 	brand,
 	size string,
 	price float64,
-	principalImage entity.URLImage,
-	// otherImages []entity.URLImage,
+	principalImage string,
+	otherImages []string,
 ) (*entity.Product, error) {
 	if validateLengthString(sku, 3, 50) {
 		return nil, ErrorFieldLimit("sku", 3, 50)
@@ -41,7 +41,7 @@ func NewProduct(
 		return nil, ErrorFieldLimit("price", entity.PriceMin, entity.PriceMax)
 	}
 
-	if strings.TrimSpace(principalImage.Url) == "" {
+	if strings.TrimSpace(principalImage) == "" {
 		return nil, errors.New("principal_url must be a valid url")
 	}
 	return &entity.Product{
@@ -51,7 +51,7 @@ func NewProduct(
 		Size:           size,
 		Price:          price,
 		PrincipalImage: principalImage,
-		// OtherImage:     otherImages,
+		OtherImages:    otherImages,
 	}, nil
 }
 

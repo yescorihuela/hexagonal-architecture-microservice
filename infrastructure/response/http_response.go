@@ -31,6 +31,7 @@ func ConvertFromEntityToResponse(ep entity.Product) *ProductResponse {
 		Brand:          ep.Brand,
 		Size:           ep.Size,
 		Price:          ep.Price,
-		PrincipalImage: ep.PrincipalImage.Url,
+		PrincipalImage: ep.PrincipalImage,
+		OtherImages:    ep.OtherImages,
 	}
 }

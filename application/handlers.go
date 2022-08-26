@@ -5,11 +5,20 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yescorihuela/agrak/domain/entity"
 	"github.com/yescorihuela/agrak/domain/factory"
 	"github.com/yescorihuela/agrak/infrastructure/response"
 	"github.com/yescorihuela/agrak/usecase"
 )
+
+var request = struct {
+	Sku            string   `json:"sku"`
+	Name           string   `json:"name"`
+	Brand          string   `json:"brand"`
+	Size           string   `json:"size"`
+	Price          float64  `json:"price"`
+	PrincipalImage string   `json:"principal_image"`
+	OtherImages    []string `json:"other_images"`
+}{}
 
 type ProductHandlers struct {
 	service usecase.Service
@@ -34,25 +43,18 @@ func (ph *ProductHandlers) GetProductBySku(ctx *gin.Context) {
 }
 
 func (ph *ProductHandlers) CreateProduct(ctx *gin.Context) {
-	reqProduct := struct {
-		Sku            string  `json:"sku"`
-		Name           string  `json:"name"`
-		Brand          string  `json:"brand"`
-		Size           string  `json:"size"`
-		Price          float64 `json:"price"`
-		PrincipalImage string  `json:"principal_image"`
-	}{}
-	err := ctx.ShouldBindJSON(&reqProduct)
+	err := ctx.ShouldBindJSON(&request)
 	if err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
 	}
 	product, err := factory.NewProduct(
-		reqProduct.Sku,
-		reqProduct.Name,
-		reqProduct.Brand,
-		reqProduct.Size,
-		reqProduct.Price,
-		entity.URLImage{Url: reqProduct.PrincipalImage},
+		request.Sku,
+		request.Name,
+		request.Brand,
+		request.Size,
+		request.Price,
+		request.PrincipalImage,
+		request.OtherImages,
 	)
 	if product != nil {
 		if validProduct, err := product.IsValid(); validProduct {
@@ -94,26 +96,27 @@ func (ph *ProductHandlers) UpdateProduct(ctx *gin.Context) {
 		return
 	}
 
-	reqProduct := struct {
-		Sku            string  `json:"sku"`
-		Name           string  `json:"name"`
-		Brand          string  `json:"brand"`
-		Size           string  `json:"size"`
-		Price          float64 `json:"price"`
-		PrincipalImage string  `json:"principal_image"`
-	}{}
-	err = ctx.ShouldBindJSON(&reqProduct)
+	err = ctx.ShouldBindJSON(&request)
 	if err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
+		return
 	}
+
 	newProduct, err := factory.NewProduct(
-		reqProduct.Sku,
-		reqProduct.Name,
-		reqProduct.Brand,
-		reqProduct.Size,
-		reqProduct.Price,
-		entity.URLImage{Url: reqProduct.PrincipalImage},
+		request.Sku,
+		request.Name,
+		request.Brand,
+		request.Size,
+		request.Price,
+		request.PrincipalImage,
+		request.OtherImages,
 	)
+
+	if err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, response.NewErrorResponse(err.Error()))
+		return
+	}
+
 	if !reflect.DeepEqual(product, newProduct) {
 		product, err = ph.service.UpdateProduct(sku, *newProduct)
 		if err != nil {

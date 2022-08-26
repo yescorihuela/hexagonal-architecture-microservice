@@ -21,8 +21,8 @@ type Product struct {
 	Brand          string
 	Size           string
 	Price          float64
-	PrincipalImage URLImage
-	// OtherImage     []URLImage
+	PrincipalImage string
+	OtherImages    []string
 }
 
 func (p *Product) IsValid() (bool, error) {
@@ -39,7 +39,7 @@ func (p *Product) IsValid() (bool, error) {
 		return false, errors.New("empty brand")
 	}
 
-	if strings.TrimSpace(string(p.PrincipalImage.Url)) == "" {
+	if strings.TrimSpace(p.PrincipalImage) == "" {
 		return false, errors.New("principal image url empty")
 	}
 	if p.Price == 0.0 {

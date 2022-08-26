@@ -41,7 +41,7 @@ func (p *PersistenceProductRepository) Save(product entity.Product) error {
 			Brand:          product.Brand,
 			Size:           product.Size,
 			Price:          product.Price,
-			PrincipalImage: product.PrincipalImage.Url,
+			PrincipalImage: product.PrincipalImage,
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
 		})
@@ -69,8 +69,8 @@ func (p *PersistenceProductRepository) GetBySku(sku string) (*entity.Product, er
 		product.Brand,
 		product.Size,
 		product.Price,
-		entity.URLImage{Url: product.PrincipalImage},
-		// []entity.URLImage{},
+		product.PrincipalImage,
+		product.OtherImages,
 	)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func (p *PersistenceProductRepository) GetAllProducts() ([]entity.Product, error
 			Brand:          v.Brand,
 			Size:           v.Size,
 			Price:          v.Price,
-			PrincipalImage: entity.URLImage{Url: v.PrincipalImage},
+			PrincipalImage: v.PrincipalImage,
 		}
 		entityProducts = append(entityProducts, productFromModel)
 	}
@@ -120,7 +120,7 @@ func (p *PersistenceProductRepository) Update(oldSku string, product entity.Prod
 		Brand:          product.Brand,
 		Size:           product.Size,
 		Price:          product.Price,
-		PrincipalImage: product.PrincipalImage.Url,
+		PrincipalImage: product.PrincipalImage,
 		UpdatedAt:      time.Now(),
 	}
 
@@ -135,7 +135,8 @@ func (p *PersistenceProductRepository) Update(oldSku string, product entity.Prod
 		newProduct.Brand,
 		newProduct.Size,
 		newProduct.Price,
-		entity.URLImage{Url: newProduct.PrincipalImage},
+		newProduct.PrincipalImage,
+		newProduct.OtherImages,
 	)
 	if err != nil {
 		return nil, err
