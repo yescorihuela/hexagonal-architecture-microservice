@@ -31,22 +31,22 @@ func (p *PostgresqlConnection) GetConnection() (*gorm.DB, error) {
 		connection, err = gorm.Open(postgres.Open(p.url), &gorm.Config{})
 	}
 	if err != nil {
-		log.WithError(err).Errorln("error to trying to open connection in DB")
+		log.WithError(err).Fatalf("error to trying to open connection in DB")
 	} else {
 		_, err := connection.DB()
 		if err != nil {
-			log.WithError(err).Errorln("error to trying to connect DB")
+			log.WithError(err).Fatalf("error to trying to connect DB")
 		}
 	}
 	return connection, nil
 }
 
 func InitPGClient() *PostgresqlConnection {
-	databaseName := os.Getenv("DB_NAME")
-	host := os.Getenv("DB_HOST")
-	port, _ := strconv.Atoi(os.Getenv("DB_PORT"))
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
+	databaseName := os.Getenv("POSTGRES_DB")
+	host := os.Getenv("POSTGRES_HOST")
+	port, _ := strconv.Atoi(os.Getenv("PGPORT"))
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
 	connection := NewPostgreSQLConnection(Config().Server(host).Port(port).DatabaseName(databaseName).User(user).Password(password))
 	return connection
 }

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  products-db:
+    image: "postgres:13"
+    volumes:
+      - pgdata:/var/postgresql/data
+    restart: always
+    env_file:
+      - .env.products
+    ports:
+      - 5433:5433
+    networks:
+      - products
+
+  products-api:
+    build:
+      dockerfile: dockerfile.products-api
+      context: .
+    ports:
+      - 8000:8000
+    env_file:
+      - .env.products
+    restart: always
+    volumes:
+      - .:/products-api
+    depends_on:
+      - products-db
+    networks:
+      - products
+
+networks:
+  products:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local
