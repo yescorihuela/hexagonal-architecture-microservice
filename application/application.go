@@ -1,10 +1,13 @@
 package application
 
-import "strconv"
+import (
+	"os"
+	"strconv"
+)
 
 func Run() error {
-	serverHost := "localhost"                         // This value would be defined by envvar
-	serverPort, _ := strconv.ParseUint("8000", 10, 0) // This value would be defined by envvar
+	serverHost := os.Getenv("BACKEND_IP")
+	serverPort, _ := strconv.ParseUint(os.Getenv("BACKEND_PORT"), 10, 0) // This value would be defined by envvar
 	server := NewServer(serverHost, uint(serverPort))
 	return server.Run()
 }
