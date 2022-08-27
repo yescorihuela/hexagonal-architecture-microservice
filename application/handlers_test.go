@@ -476,8 +476,6 @@ func TestUpdateProduct(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusUnprocessableEntity, rr.Code)
 		assert.Equal(t, response, rr.Body.Bytes())
-
-		// mockUsecase.AssertNotCalled(t, "UpdateProduct", oldSku, *mockEntityProduct)
 		mockUsecase.AssertExpectations(t)
 	})
 }
