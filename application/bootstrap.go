@@ -4,6 +4,10 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/yescorihuela/agrak/docs"
 	"github.com/yescorihuela/agrak/infrastructure/postgresql/connection"
 	"github.com/yescorihuela/agrak/infrastructure/postgresql/product"
 	"github.com/yescorihuela/agrak/usecase"
@@ -31,7 +35,20 @@ func (s *Server) Run() error {
 	return s.engine.Run(s.httpAddr)
 }
 
+// @title Agrak Products API
+// @version versión(1.0)
+// @description Description
+
+// @contact.name API supporter
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @host localhost:8000
+// @BasePath /api/v1
 func (s *Server) registerRoutes() {
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	s.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	productRepository := product.NewPersistenceProductRepository(s.dbClient)
 	productService := usecase.NewProductService(productRepository)
 

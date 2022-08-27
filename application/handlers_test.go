@@ -125,7 +125,6 @@ func TestCreateProduct(t *testing.T) {
 		mockUsecase.AssertNotCalled(t, "CreateProduct", mockEntityProduct)
 	})
 }
-
 func TestGetProductBySku(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -193,7 +192,6 @@ func TestGetProductBySku(t *testing.T) {
 		mockUsecase.AssertExpectations(t)
 	})
 }
-
 func TestGetAllProducts(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -244,7 +242,7 @@ func TestGetAllProducts(t *testing.T) {
 
 		router.ServeHTTP(rr, request)
 		response, err := json.Marshal(
-			[]response.ProductResponse{
+			[]response.DTOProduct{
 				*mockProductReturned1,
 				*mockProductReturned2,
 			})
