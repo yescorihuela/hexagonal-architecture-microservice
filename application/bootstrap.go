@@ -37,7 +37,7 @@ func (s *Server) registerRoutes() {
 
 	ph := NewProductHandlers(productService)
 
-	v1 := s.engine.Group("/v1")
+	v1 := s.engine.Group("api/v1")
 	v1.GET("/products/", ph.GetAllProducts)
 	v1.GET("/products/:sku", ph.GetProductBySku)
 	v1.POST("/products", ph.CreateProduct)
