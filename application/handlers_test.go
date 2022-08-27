@@ -195,6 +195,8 @@ func TestGetProductBySku(t *testing.T) {
 }
 
 func TestGetAllProducts(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
 	t.Run("GetAllProducts - 200 OK", func(t *testing.T) {
 		mockEntityProduct1, _ := factory.NewProduct(
 			"FAL-1000000",
@@ -256,7 +258,7 @@ func TestGetAllProducts(t *testing.T) {
 	t.Run("GetAllProducts - 404 Not found", func(t *testing.T) {
 		mockUsecase := new(usecase.UseCaseMock)
 
-		mockUsecase.On("FindAll").Return([]entity.Product{}, nil)
+		mockUsecase.On("FindAll").Return(nil, errors.New("records not found"))
 		rr := httptest.NewRecorder()
 		router := gin.Default()
 		router.Group("v1")
@@ -267,11 +269,38 @@ func TestGetAllProducts(t *testing.T) {
 		assert.NoError(t, err)
 
 		router.ServeHTTP(rr, request)
-		response, err := json.Marshal(
-			[]response.ProductResponse{})
+		response, err := json.Marshal(gin.H{
+			"message": "records not found",
+		})
 
 		assert.NoError(t, err)
-		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Equal(t, response, rr.Body.Bytes())
+		mockUsecase.AssertExpectations(t)
+	})
+}
+
+func TestDelete(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	t.Run("Delete - 204 No content", func(t *testing.T) {
+		sku := "FAL-1000000"
+		resource := fmt.Sprintf("/products/%s", sku)
+		mockUsecase := new(usecase.UseCaseMock)
+
+		mockUsecase.On("DeleteProduct", sku).Return(nil)
+		rr := httptest.NewRecorder()
+		router := gin.Default()
+		router.Group("v1")
+		router.DELETE("/products/:sku", NewProductHandlers(mockUsecase).Delete)
+
+		request, err := http.NewRequest(http.MethodDelete, resource, nil)
+
+		assert.NoError(t, err)
+
+		router.ServeHTTP(rr, request)
+		response := []byte(nil)
+
+		assert.Equal(t, http.StatusNoContent, rr.Code)
 		assert.Equal(t, response, rr.Body.Bytes())
 		mockUsecase.AssertExpectations(t)
 	})

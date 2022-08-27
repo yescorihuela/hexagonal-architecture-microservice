@@ -31,7 +31,17 @@ func (m *UseCaseMock) FindBySku(sku string) (*entity.Product, error) {
 
 func (m *UseCaseMock) FindAll() ([]entity.Product, error) {
 	args := m.Called()
-	return args.Get(0).([]entity.Product), args.Error(1)
+	var mockedEntityProduct []entity.Product
+	var mockedError error
+	if args.Get(0) != nil {
+		mockedEntityProduct = args.Get(0).([]entity.Product)
+	}
+
+	if args.Get(1) != nil {
+		mockedError = args.Get(1).(error)
+	}
+
+	return mockedEntityProduct, mockedError
 }
 
 func (m *UseCaseMock) UpdateProduct(oldSku string, product entity.Product) (*entity.Product, error) {
