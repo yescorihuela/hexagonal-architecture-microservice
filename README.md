@@ -1,1 +1,4 @@
-# agrak-exercise-solution
+# Agrak API Products exercise
+
+## Introduction
+WIP...
