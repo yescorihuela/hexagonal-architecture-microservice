@@ -95,6 +95,9 @@ func (p *PersistenceProductRepository) GetAllProducts() ([]entity.Product, error
 	if result.Error != nil {
 		return nil, err
 	}
+	if result.RowsAffected <= 0 {
+		return nil, errors.New("records not found")
+	}
 	entityProducts := make([]entity.Product, 0)
 	for _, v := range products {
 		productFromModel := entity.Product{

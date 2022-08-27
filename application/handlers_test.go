@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/yescorihuela/agrak/domain/entity"
 	"github.com/yescorihuela/agrak/domain/factory"
 	"github.com/yescorihuela/agrak/infrastructure/response"
 	"github.com/yescorihuela/agrak/usecase"
@@ -191,4 +192,88 @@ func TestGetProductBySku(t *testing.T) {
 		assert.Equal(t, response, rr.Body.Bytes())
 		mockUsecase.AssertExpectations(t)
 	})
+}
+
+func TestGetAllProducts(t *testing.T) {
+	t.Run("GetAllProducts - 200 OK", func(t *testing.T) {
+		mockEntityProduct1, _ := factory.NewProduct(
+			"FAL-1000000",
+			"Polera",
+			"CAT",
+			"XL",
+			20000.00,
+			"https://placehold.jp/3d4070/ffffff/150x150.png",
+			[]string{
+				"https://placehold.jp/30/dd6699/ffffff/300x150.png?text=placeholder+image",
+				"https://placehold.jp/24/cccccc/ffffff/250x50.png?text=placehold.jp",
+			},
+		)
+
+		mockEntityProduct2, _ := factory.NewProduct(
+			"FAL-1000001",
+			"Polera",
+			"CAT",
+			"L",
+			15000.00,
+			"https://placehold.jp/3d4070/ffffff/150x150.png",
+			[]string{
+				"https://placehold.jp/30/dd6699/ffffff/300x150.png?text=placeholder+image",
+				"https://placehold.jp/24/cccccc/ffffff/250x50.png?text=placehold.jp",
+			},
+		)
+
+		mockProductReturned1 := response.ConvertFromEntityToResponse(*mockEntityProduct1)
+		mockProductReturned2 := response.ConvertFromEntityToResponse(*mockEntityProduct2)
+		mockUsecase := new(usecase.UseCaseMock)
+
+		mockUsecase.On("FindAll").Return(
+			[]entity.Product{
+				*mockEntityProduct1,
+				*mockEntityProduct2,
+			}, nil)
+		rr := httptest.NewRecorder()
+		router := gin.Default()
+		router.Group("v1")
+		router.GET("/products/", NewProductHandlers(mockUsecase).GetAllProducts)
+
+		request, err := http.NewRequest(http.MethodGet, "/products/", nil)
+
+		assert.NoError(t, err)
+
+		router.ServeHTTP(rr, request)
+		response, err := json.Marshal(
+			[]response.ProductResponse{
+				*mockProductReturned1,
+				*mockProductReturned2,
+			})
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, response, rr.Body.Bytes())
+		mockUsecase.AssertExpectations(t)
+	})
+
+	t.Run("GetAllProducts - 404 Not found", func(t *testing.T) {
+		mockUsecase := new(usecase.UseCaseMock)
+
+		mockUsecase.On("FindAll").Return([]entity.Product{}, nil)
+		rr := httptest.NewRecorder()
+		router := gin.Default()
+		router.Group("v1")
+		router.GET("/products/", NewProductHandlers(mockUsecase).GetAllProducts)
+
+		request, err := http.NewRequest(http.MethodGet, "/products/", nil)
+
+		assert.NoError(t, err)
+
+		router.ServeHTTP(rr, request)
+		response, err := json.Marshal(
+			[]response.ProductResponse{})
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, response, rr.Body.Bytes())
+		mockUsecase.AssertExpectations(t)
+	})
+
 }
