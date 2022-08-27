@@ -1,0 +1,194 @@
+package application
+
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"github.com/yescorihuela/agrak/domain/factory"
+	"github.com/yescorihuela/agrak/infrastructure/response"
+	"github.com/yescorihuela/agrak/usecase"
+)
+
+func TestCreateProduct(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	t.Run("CreateProduct - 201 Created", func(t *testing.T) {
+		mockProductPayload := struct {
+			Sku            string   `json:"sku"`
+			Name           string   `json:"name"`
+			Brand          string   `json:"brand"`
+			Size           string   `json:"size"`
+			Price          float64  `json:"price"`
+			PrincipalImage string   `json:"principal_image"`
+			OtherImages    []string `json:"other_images"`
+		}{
+			Sku:            "FAL-1000000",
+			Name:           "Polera",
+			Brand:          "CAT",
+			Size:           "XL",
+			Price:          20000.00,
+			PrincipalImage: "https://placehold.jp/3d4070/ffffff/150x150.png",
+			OtherImages: []string{
+				"https://placehold.jp/30/dd6699/ffffff/300x150.png?text=placeholder+image",
+				"https://placehold.jp/24/cccccc/ffffff/250x50.png?text=placehold.jp",
+			},
+		}
+		mockEntityProduct, _ := factory.NewProduct(
+			mockProductPayload.Sku,
+			mockProductPayload.Name,
+			mockProductPayload.Brand,
+			mockProductPayload.Size,
+			mockProductPayload.Price,
+			mockProductPayload.PrincipalImage,
+			mockProductPayload.OtherImages,
+		)
+
+		mockUsecase := new(usecase.UseCaseMock)
+
+		mockUsecase.On("CreateProduct", *mockEntityProduct).Return(nil)
+		rr := httptest.NewRecorder()
+		router := gin.Default()
+		router.Group("v1")
+		router.POST("/products", NewProductHandlers(mockUsecase).CreateProduct)
+		payload, _ := json.Marshal(mockProductPayload)
+		request, err := http.NewRequest(http.MethodPost, "/products", bytes.NewBuffer(payload))
+
+		assert.NoError(t, err)
+
+		router.ServeHTTP(rr, request)
+		response, err := json.Marshal(mockProductPayload)
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusCreated, rr.Code)
+		assert.Equal(t, response, rr.Body.Bytes())
+		mockUsecase.AssertExpectations(t)
+	})
+
+	t.Run("CreateProduct - 422 Unprocessable Entity", func(t *testing.T) {
+		mockProductPayload := struct {
+			Sku            string   `json:"sku"`
+			Name           string   `json:"name"`
+			Brand          string   `json:"brand"`
+			Size           string   `json:"size"`
+			Price          float64  `json:"price"`
+			PrincipalImage string   `json:"principal_image"`
+			OtherImages    []string `json:"other_images"`
+		}{
+			Sku:            "FAL-100000",
+			Name:           "Polera",
+			Brand:          "CAT",
+			Size:           "XL",
+			Price:          20000.00,
+			PrincipalImage: "https://placehold.jp/3d4070/ffffff/150x150.png",
+			OtherImages: []string{
+				"https://placehold.jp/30/dd6699/ffffff/300x150.png?text=placeholder+image",
+				"https://placehold.jp/24/cccccc/ffffff/250x50.png?text=placehold.jp",
+			},
+		}
+		mockEntityProduct, _ := factory.NewProduct(
+			mockProductPayload.Sku,
+			mockProductPayload.Name,
+			mockProductPayload.Brand,
+			mockProductPayload.Size,
+			mockProductPayload.Price,
+			mockProductPayload.PrincipalImage,
+			mockProductPayload.OtherImages,
+		)
+
+		mockUsecase := new(usecase.UseCaseMock)
+
+		mockUsecase.On("CreateProduct", *mockEntityProduct).Return(errors.New("invalid sku format (right format: FAL-XXXXXXX)"))
+		rr := httptest.NewRecorder()
+		router := gin.Default()
+		router.Group("v1")
+		router.POST("/products", NewProductHandlers(mockUsecase).CreateProduct)
+		payload, _ := json.Marshal(mockProductPayload)
+		request, err := http.NewRequest(http.MethodPost, "/products", bytes.NewBuffer(payload))
+
+		assert.NoError(t, err)
+
+		router.ServeHTTP(rr, request)
+		response, err := json.Marshal(gin.H{
+			"message": "invalid sku format (right format: FAL-XXXXXXX)",
+		})
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusUnprocessableEntity, rr.Code)
+		assert.Equal(t, response, rr.Body.Bytes())
+		mockUsecase.AssertNotCalled(t, "CreateProduct", mockEntityProduct)
+	})
+}
+
+func TestGetProductBySku(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	t.Run("GetProductBySku - 200 OK", func(t *testing.T) {
+
+		sku := "FAL-1000000"
+		mockEntityProduct, _ := factory.NewProduct(
+			"FAL-1000000",
+			"Polera",
+			"CAT",
+			"XL",
+			20000.00,
+			"https://placehold.jp/3d4070/ffffff/150x150.png",
+			[]string{
+				"https://placehold.jp/30/dd6699/ffffff/300x150.png?text=placeholder+image",
+				"https://placehold.jp/24/cccccc/ffffff/250x50.png?text=placehold.jp",
+			},
+		)
+		mockProductReturned := response.ConvertFromEntityToResponse(*mockEntityProduct)
+		mockUsecase := new(usecase.UseCaseMock)
+
+		mockUsecase.On("FindBySku", sku).Return(mockEntityProduct, nil)
+		rr := httptest.NewRecorder()
+		router := gin.Default()
+		router.Group("v1")
+		router.GET("/products/:sku", NewProductHandlers(mockUsecase).GetProductBySku)
+
+		request, err := http.NewRequest(http.MethodGet, "/products/FAL-1000000", nil)
+
+		assert.NoError(t, err)
+
+		router.ServeHTTP(rr, request)
+		response, err := json.Marshal(mockProductReturned)
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, response, rr.Body.Bytes())
+		mockUsecase.AssertExpectations(t)
+	})
+
+	t.Run("GetProductBySku - 404 Not Found", func(t *testing.T) {
+
+		sku := "FAL-9999999"
+		resource := fmt.Sprintf("/products/%s", sku)
+		mockUsecase := new(usecase.UseCaseMock)
+
+		mockUsecase.On("FindBySku", sku).Return(nil, errors.New("record not found"))
+		rr := httptest.NewRecorder()
+		router := gin.Default()
+		router.Group("v1")
+		router.GET("/products/:sku", NewProductHandlers(mockUsecase).GetProductBySku)
+
+		request, err := http.NewRequest(http.MethodGet, resource, nil)
+
+		assert.NoError(t, err)
+
+		router.ServeHTTP(rr, request)
+		response, err := json.Marshal(gin.H{
+			"message": "record not found",
+		})
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Equal(t, response, rr.Body.Bytes())
+		mockUsecase.AssertExpectations(t)
+	})
+}
