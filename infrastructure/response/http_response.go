@@ -4,7 +4,7 @@ import (
 	"github.com/yescorihuela/agrak/domain/entity"
 )
 
-type ProductResponse struct {
+type DTOProduct struct {
 	Sku            string   `json:"sku"`
 	Name           string   `json:"name"`
 	Brand          string   `json:"brand"`
@@ -24,9 +24,8 @@ func NewErrorResponse(message string) *ErrorResponse {
 	}
 }
 
-func ConvertFromEntityToResponse(ep entity.Product) *ProductResponse {
-
-	return &ProductResponse{
+func ConvertFromEntityToResponse(ep entity.Product) *DTOProduct {
+	return &DTOProduct{
 		Sku:            ep.Sku,
 		Name:           ep.Name,
 		Brand:          ep.Brand,

@@ -1,0 +1,167 @@
+definitions:
+  response.DTOProduct:
+    properties:
+      brand:
+        type: string
+      name:
+        type: string
+      other_images:
+        items:
+          type: string
+        type: array
+      price:
+        type: number
+      principal_image:
+        type: string
+      size:
+        type: string
+      sku:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/products/:
+    get:
+      consumes:
+      - application/json
+      description: list all the products as an array
+      parameters:
+      - description: Not required.
+        in: query
+        name: none
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.DTOProduct'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: List all the stored products
+    post:
+      consumes:
+      - application/json
+      description: add by json product
+      parameters:
+      - description: Add new product with unique SKU
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/response.DTOProduct'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.DTOProduct'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Add a product
+  /api/v1/products/{sku}:
+    delete:
+      consumes:
+      - application/json
+      description: delete product by SKU
+      parameters:
+      - description: Product unique SKU
+        in: path
+        name: sku
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Delete a product by SKU
+    get:
+      consumes:
+      - application/json
+      description: get product by SKU as json
+      parameters:
+      - description: Product unique SKU
+        in: path
+        name: sku
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.DTOProduct'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Retrieve a product by SKU
+    put:
+      consumes:
+      - application/json
+      description: delete product by SKU
+      parameters:
+      - description: Product unique SKU
+        in: path
+        name: sku
+        required: true
+        type: string
+      - description: Product body with unique SKU
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/response.DTOProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.DTOProduct'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Delete a product by SKU
+swagger: "2.0"
