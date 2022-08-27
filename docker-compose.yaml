@@ -10,6 +10,12 @@ services:
       - .env.products
     ports:
       - 5433:5433
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "products"]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
     networks:
       - products
 
@@ -25,7 +31,8 @@ services:
     volumes:
       - .:/products-api
     depends_on:
-      - products-db
+      products-db:
+        condition: service_healthy
     networks:
       - products
 
