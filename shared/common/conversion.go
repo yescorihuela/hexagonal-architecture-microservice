@@ -17,6 +17,5 @@ func GetSlicedUrls(urls string) []string {
 }
 
 func GetStringFromSlicedUrls(slicedUrls []string) string {
-	joinedUrls := strings.TrimSpace(strings.Join(slicedUrls, ","))
-	return joinedUrls
+	return strings.TrimSpace(strings.Join(slicedUrls, ","))
 }
