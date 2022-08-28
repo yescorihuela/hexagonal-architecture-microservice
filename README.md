@@ -12,11 +12,15 @@ The intended solution in this exercise is based on my own experience and some re
 
 ## Design decisions made
 - Although it is a relatively simple exercise, I developed it based (obviously) in my own experience but incorporating some stuff learned from books too: In this case it was **Hexagonal Architecture (HA)** also known as **Ports and Adapters**, the intensive usage of **SOLID principles** brings to me to make this decision, especially for Dependency Injection principle and Liskov Substituion principle.
-- The decision for the implementation of HA is related to **job description** from Agrak: *API-First approach, Event-Driven Architecture, Swagger, Clean and Hex Architecture* ❤️.
+- The decision for the implementation of HA is related to **job description** from Agrak: *API-First approach, Event-Driven Architecture, Swagger, Clean and Hex Architecture* 😍.
 - **Why don't use MVC**? Is a good question, the answer is really easy: I think that HA flows more natural and give more abstraction and isolation of the components than MVC, this means less coupling among the layers too. Although HA is agnostic, the implementation with Go is wonderful, there are many readings about that.
 - Docker / Docker compose usage: this decision was made at first of the development but incorporated later, the reason is **because the time is limited** and I needed developing the solution as soon as posible. This isolation with docker gives more confidence at the time to run the app without worries to fail.
 - The database container has a healthchecker for avoid logging errors from the app when the app tries to connect to database, the tradeoff of that is a new error from database about `role "root" does not exist`, but all the system works fine.
 - The usage of PostgreSQL is related to ease to usage, but I wanted at first time use 2 database to switch and test the repository pattern (the second one db keep in mind was MongoDB).
+
+## Hexagonal Architecture Design App
+
+![hexagonal architecture in project](hexagonal-architecture-products.svg)
 
 ## Bootstrapping
 Inside the project, I wrote a makefile to save time typing the commands, especially for docker compose and run tests.
