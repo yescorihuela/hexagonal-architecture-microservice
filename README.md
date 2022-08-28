@@ -5,7 +5,7 @@ The intended solution in this exercise is based on my own experience and some re
 
 ## Technologies used
 - Go 1.17.10 as programming language
-- Gin-gonic 1.8.1 as a http router
+- Gin-gonic 1.8.1 as a http server and router 
 - PostgreSQL 13 as RDBMS
 - Docker 20.10.12
 - Docker Compose 1.29.2
